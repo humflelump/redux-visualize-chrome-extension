@@ -146,6 +146,7 @@ function applyTransformOnRectangles(rectangles, dx, dy) {
 function createBranchOfRectangles(nodes) {
     const rects = [];
     const group = _.groupBy(nodes, d => d.minDepth);
+    console.log('group', group);
     const width = getWidth(nodes);
     _.values(group).forEach((row, index) => {
         const L = row.length;

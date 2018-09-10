@@ -90,17 +90,8 @@ function getStyles(rect, highlight, animated) {
 }
 
 function getTypeText(rect) {
-    if (rect.data.type !== visConstants.STATE_VARIABLE) {
-        return rect.data.type;
-    }
-    const L = rect.data.pathsToState.length;
-    if (L === 1) {
-        return rect.data.pathsToState[0];
-    } else if (L > 1) {
-        return `${L} Places in State`;
-    } else {
-        return `Not Found in State`;
-    }
+    return rect.data.type;
+    
 }
 
 const Node = (props) => {
