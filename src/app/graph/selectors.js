@@ -12,7 +12,9 @@ const xTo = state => state.Graph.xTo;
 const yTo = state => state.Graph.yTo;
 const xFrom = state => state.Graph.xFrom;
 const yFrom = state => state.Graph.yFrom;
-const rectangles = graphSelectors.rectangles;
+//const rectangles = graphSelectors.rectangles;
+
+const rectangles = state => graphSelectors.graph_(state).rectsList;
 
 
 function getDimensions(width, height) {
@@ -82,7 +84,7 @@ function getRectangesInPixelSpace(rectangles, xScale, yScale) {
         const x2 = xScale(rect.x + rect.width);
         const y2 = yScale(rect.y + rect.height);
         return {
-            ...rect,
+            data: rect.node.data,
             x: x1,
             y: y1,
             width: x2 - x1,

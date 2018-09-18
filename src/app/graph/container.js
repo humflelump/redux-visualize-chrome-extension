@@ -104,6 +104,7 @@ const mapStateToProps = (state, ownProps) => {
     flatGraph: graphSelectors.flatGraph(state),
     nodesWithCoordinates: graphSelectors.nodesWithCoordinates(state),
     highlightedNodes: graphSelectors.highlightedNodes(state),
+    rects: graphSelectors.graph_(state).rects,
   };
 }
 

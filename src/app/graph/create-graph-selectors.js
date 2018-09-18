@@ -4,6 +4,9 @@ import * as d3 from 'd3';
 import * as functions from './functions';
 import * as constants from './constants';
 import _ from 'underscore';
+import Graph from '../classes/graph';
+import Node from '../classes/node';
+import RectangleManager from '../classes/rectangle-list';
 
 const serializableFlatGraph = state => state.Graph.graph;
 const hoveredNode = state => state.Graph.hoveredNode;
@@ -63,9 +66,22 @@ function getRoots(graph) {
 export const rootNodes = createSelector([graph], getRoots);
 
 function flattenGraph(rootNodes) {
-    return functions.flattenGraph(rootNodes);
+    const result = functions.flattenGraph(rootNodes);
+    console.log('flat graph', result);
+    return result;
 }
 export const flatGraph = createSelector([rootNodes], flattenGraph);
+
+function createGraph(flatGraph) {
+    const nodes = flatGraph.map(d => {
+        return new Node(d.data, d.data.id);
+    });
+    const graph = new Graph(nodes);
+    const rects = new RectangleManager(graph);
+
+    return rects;
+}
+export const graph_ = createSelector([flatGraph], createGraph);
 
 function getNodesWithCoordinates(flatGraph) {
     const grouping = _.groupBy(flatGraph, d => d.root.data.id);

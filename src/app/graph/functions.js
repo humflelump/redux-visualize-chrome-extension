@@ -46,7 +46,7 @@ export function giveNodeDepth(node) {
 }
 
 function giveNodeDepthHelper(node, depth, root) {
-    if (node.depth === undefined || depth > node.depth) {
+    if (typeof node.depth !== 'number' || depth > node.depth) {
         node.depth = depth;
         node.root = root;
     }
@@ -61,7 +61,7 @@ export function giveNodeMinDepth(node) {
 
 function giveNodeMinDepthHelper(node, depth, root) {
     if (node.root === root) {
-        if (node.minDepth === undefined || node.minDepth > depth) {
+        if (typeof node.minDepth !== 'number' || node.minDepth > depth) {
             node.minDepth = depth;
         }
     }
@@ -99,9 +99,9 @@ export function giveTreeCoordinates(nodes) {
     });
 }
 
-const PADDING = 30;
-const HEIGHT = 80;
-const WIDTH = 130;
+const PADDING = 70;
+const HEIGHT = 150;
+const WIDTH = 200;
 
 function getDimensions(node) {
     return {
