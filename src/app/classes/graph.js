@@ -14,8 +14,11 @@ export default class Graph {
         this.giveNodesDirectChildren();
         this.giveNodesWidth();
         this.giveNodesAllowedExtents();
-        this.giveNodesAllowedPositions();
-        this.solveForX();
+        const MAX_ITERATIONS = 2;
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
+            this.giveNodesAllowedPositions();
+            this.solveForX();
+        }
         console.log('graph', this);
     }
 
@@ -43,6 +46,7 @@ export default class Graph {
     giveGraphParentsAndChildren() {
         for (const node of this.nodes) {
             for (const id of node.data.dependencies) {
+                console.log('id', 'grr', this);
                 const child = this.indexedNodes[id];
                 node.addChild(child);
                 child.addParent(node);
@@ -154,21 +158,25 @@ export function giveNodeMinX(node) {
 }
 
 function giveSolution(node) {
+    giveNodeAllowedPositions(node)
     const children = node.directChildren;
     const sorted = _.sortBy(children, d => d.allowedPositions.length);
+    getSolution.count = 0;
     const solution = getSolution(sorted, 0, []);
     sorted.forEach((child, i) => {
         child.x = solution[i];
         giveSolution(child);
     });
 }
-
+//122668
+const MAX_CALLS = 500; // give up finding a solution
 function getSolution(nodes, index, previouslySeen) {
+    getSolution.count += 1;
     if (index >= nodes.length) return [];
     const node = nodes[index];
     const previousSet = new Set(previouslySeen);
     for (const n of node.allowedPositions) {
-        if (!previousSet.has(n)) {
+        if (!previousSet.has(n) || getSolution.count > MAX_CALLS) {
             const newAr = [...previouslySeen, n];
             return [n, ...getSolution(nodes, index+1, newAr)];
         }

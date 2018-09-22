@@ -50,7 +50,7 @@ function update(data, dom) {
     const enter = sel => sel
         .attr('class', 'arr')
         .attr('stroke', 'red')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 1)
         .attr('stroke-dasharray', 2.5)
 
     const update = sel => sel

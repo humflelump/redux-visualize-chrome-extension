@@ -1,4 +1,8 @@
 
+export const WIDTH = 150;
+export const HEIGHT = 100;
+export const PADDING = 50;
+
 export const STRING = 'string';
 
 export const RESELECT_SELECTOR = 'RESELECT_SELECTOR';
@@ -37,3 +41,5 @@ export const NEITHER = 'Neither';
 export const FILTER_OPTIONS = [DEPENDANCIES, DEPENDANTS, BOTH, /*NEITHER*/];
 
 export const TRANSITION_MS = 200;
+
+export const SETTINGS_WIDTH = 300;

@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import * as selectors from './selectors';
 import * as constants from './constants';
 import * as graphSelectors from './create-graph-selectors';
-import * as filterSelectors from './node-filter-selectors';
 import * as d3 from 'd3';
 import * as actions from './actions';
 
@@ -34,7 +33,7 @@ const Settings = (props) => {
     const styles = getStyles();
     return <Drawer
         docked={false}
-        width={300}
+        width={constants.SETTINGS_WIDTH}
         open={props.open}
         onRequestChange={props.close}
         openSecondary={true}

@@ -5,8 +5,9 @@ import * as constants from './constants';
 import * as graphSelectors from '../graph/create-graph-selectors';
 import _ from 'underscore';
 import search from 'material-ui/svg-icons/action/search';
+import * as contextMenuSelectors from '../context-menu/selectors';
 
-const selectedNodes = graphSelectors.selectedNodes;
+const nodes = contextMenuSelectors.nodes;
 const searchText = state => state.Search.searchText;
 const open = state => state.Search.open;
 
@@ -18,19 +19,18 @@ function compareStrings(str_, searchStr_) {
     return 0;
 }
 
-function getSearchResults(selectedNodes, searchText) {
-    console.log('selectedNodes, searchText', selectedNodes, searchText)
+function getSearchResults(nodes, searchText) {
+    //console.log('selectedNodes, searchText', selectedNodes, searchText)
     if (searchText === '') return [];
-    const filtered = selectedNodes.filter((node) => {
-        return compareStrings(node.name, searchText) > 0;
+    const filtered = nodes.filter((node) => {
+        return compareStrings(node.data.name, searchText) > 0;
     });
     const result = _.sortBy(filtered, (node) => {
-        return compareStrings(node.name, searchText);
+        return compareStrings(node.data.name, searchText);
     });
-    console.log('result', result);
     return result
 }
-export const searchResults = createSelector([selectedNodes, searchText], getSearchResults);
+export const searchResults = createSelector([nodes, searchText], getSearchResults);
 
 function getIfDropdownIsVisible(searchResults, open) {
     if (!open) return false;

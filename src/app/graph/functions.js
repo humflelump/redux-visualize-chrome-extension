@@ -99,8 +99,8 @@ export function giveTreeCoordinates(nodes) {
     });
 }
 
-const PADDING = 70;
-const HEIGHT = 150;
+const PADDING = 50;
+const HEIGHT = 120;
 const WIDTH = 200;
 
 function getDimensions(node) {

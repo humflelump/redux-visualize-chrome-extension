@@ -7,16 +7,18 @@ const initialState = {
     filterOption: constants.DEPENDANCIES,
     animations: false,
     settingsOpen: false,
+    nodeWithMenu: null,
     xTo: [0, 500],
     xFrom: [0, 500],
     yTo: [0, 500],
     yFrom: [0, 500],
-
 };
 const Graph = (state = initialState, action) => {
     switch (action.type) {
         case 'SET_GRAPH':
             return { ...state, graph: action.graph};
+        case 'SET_NODE_WITH_MENU':
+            return { ...state, nodeWithMenu: action.node };
         case 'SET_HOVERED_NODE':
             return { ...state, hoveredNode: action.node };
         case 'SET_CLICKED_NODES':

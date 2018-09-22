@@ -12,9 +12,7 @@ const xTo = state => state.Graph.xTo;
 const yTo = state => state.Graph.yTo;
 const xFrom = state => state.Graph.xFrom;
 const yFrom = state => state.Graph.yFrom;
-//const rectangles = graphSelectors.rectangles;
-
-const rectangles = state => graphSelectors.graph_(state).rectsList;
+const rectangles = graphSelectors.rectangles;
 
 
 function getDimensions(width, height) {
@@ -33,7 +31,6 @@ export function getZoomedOutScales(rectangles, chartDimensions) {
     const size = Math.min(chartDimensions.width, chartDimensions.height)
     const padding = size / 20;
     const extent = [padding, size - padding];
-    console.log('woo', rectangles);
     const result = {
         x: [d3.min(rectangles.map(d => d.x)), d3.max(rectangles.map(d => d.x + d.width))],
         y: [d3.min(rectangles.map(d => d.y)), d3.max(rectangles.map(d => d.y + d.height))],
@@ -41,7 +38,6 @@ export function getZoomedOutScales(rectangles, chartDimensions) {
     const size2 = Math.max(result.x[1] - result.x[0], result.y[1] - result.y[0]);
     result.x[1] = result.x[0] + size2;
     result.y[1] = result.y[0] + size2;
-    console.log('result', result);
     return {
         x: d3.scaleLinear().domain(result.x).range(extent),
         y: d3.scaleLinear().domain(result.y).range(extent),
@@ -84,7 +80,7 @@ function getRectangesInPixelSpace(rectangles, xScale, yScale) {
         const x2 = xScale(rect.x + rect.width);
         const y2 = yScale(rect.y + rect.height);
         return {
-            data: rect.node.data,
+            node: rect.node,
             x: x1,
             y: y1,
             width: x2 - x1,
@@ -99,10 +95,10 @@ export const pxlRects = createSelector([rectangles, xScale, yScale], getRectange
 
 
 function getArrows(rectangles) {
-    const indexed = _.indexBy(rectangles, d => d.data.id);
+    const indexed = _.indexBy(rectangles, d => d.node.id);
     const arrows = [];
     for (const rectangle of rectangles) {
-        for (const id of rectangle.data.dependencies) {
+        for (const id of rectangle.node.data.dependencies) {
             const target = indexed[id];
             const start = functions.getArrowStart(rectangle);
             const end = functions.getArrowEnd(target);
@@ -111,7 +107,7 @@ function getArrows(rectangles) {
                 y1: start.y,
                 x2: end.x,
                 y2: end.y,
-                id: rectangle.data.id + '>' + target.data.id,
+                id: rectangle.node.data.id + '>' + target.node.data.id,
             };
             arrows.push(arrow);
         }

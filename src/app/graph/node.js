@@ -20,6 +20,9 @@ function getStyles(rect, highlight, animated) {
             border: BORDER,
             transition: animated ? `all linear ${t}s` : `background-color linear ${t}s`,
             transitionTimingFunction: 'linear',
+            borderRadius: 5 * rect.scale,
+            overflow: 'hidden',
+            //boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 10px, rgba(0, 0, 0, 0.23) 0px 3px 10px',
         },
         header: {
             position: 'absolute',
@@ -31,13 +34,14 @@ function getStyles(rect, highlight, animated) {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            backgroundColor: visConstants.getColorForType(rect.data.type),
+            backgroundColor: visConstants.getColorForType(rect.node.data.type),
         },
         headerText: {
             fontFamily: '"Roboto", sans-serif',
-            fontSize: 12 * rect.scale,
+            fontSize: 15 * rect.scale,
             color: 'black',
             textAlign: 'center',
+            marginTop: '1%',
         },
         typeArea: {
             position: 'absolute',
@@ -86,6 +90,16 @@ function getStyles(rect, highlight, animated) {
             color: 'black',
 
         },
+        body: {
+            position: 'absolute',
+            top: '20%',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            fontSize: 9 * rect.scale,
+            paddingLeft: 5 * rect.scale,
+            paddingTop: -5 * rect.scale,
+        },
     };
 }
 
@@ -99,35 +113,43 @@ const Node = (props) => {
     const styles = getStyles(rect, highlight, props.animations);
     return (<div 
         style={styles.container} 
-        onMouseEnter={() => props.setHovered(rect.data.id)}
+        onContextMenu={(e) => {
+            e.preventDefault();
+            props.setMenu(rect);
+        }}
+        onMouseEnter={() => props.setHovered(rect.node.data.id)}
         onMouseLeave={() => props.setHovered(null)}
-        onClick={() => actions.clickNode(rect.data.id)}
+        onClick={() => props.setClicked(rect.node.id)}
     >
         <div style={styles.header}>
-            <div style={styles.headerText}>{rect.data.name}</div>
+            <div style={styles.headerText}>{rect.node.data.name}</div>
         </div>
-        <div style={styles.typeArea}>
-            <div style={styles.typeText}>{getTypeText(rect)}</div>
-        </div>
-        <div style={styles.valueHeader}>Current Value:</div>
-        <div style={styles.valueContainer} onClick={() => console.log(rect.data.value)}>
-            <div style={styles.valueText}>{rect.data.stringifiedResult.slice(0, 80)}</div>
+        <div style={styles.body}>
+            <pre>
+                {rect.scale > 0.5 ? (rect.node.data.stringifiedResult || '') : ''}
+            </pre>
         </div>
     </div>)
 }
 
 const mapDispatch = (dispatch) => {
     return {
+        setMenu: (node) => {
+            dispatch({
+                type: 'SET_NODE_WITH_MENU',
+                node,
+            });
+        },
         setHovered: (id) => {
             dispatch({
                 type: 'SET_HOVERED_NODE',
                 node: id,
             });
         },
-        setClicked: (id) => {
+        setClicked: (node) => {
             dispatch({
-                type: 'SET_CLICKED_NODE',
-                node: id,
+                type: 'SET_SELECTED_NODE',
+                node,
             });
         },
     }
@@ -138,6 +160,5 @@ const mapState = (state) => {
         animations: state.Graph.animations,
     }
 }
-
 
 export default connect(mapState, mapDispatch)(Node);

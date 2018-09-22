@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux'
 import * as selectors from './selectors';
 import * as graphSelectors from './create-graph-selectors';
-import * as filterSelectors from './node-filter-selectors';
 import * as d3 from 'd3';
 import Node from './node';
 import Arrows from './arrow';
@@ -58,9 +57,9 @@ class Graph extends React.Component {
             {
                 this.props.pxlRects.map((rect) => {
                     return (<Node 
-                        key={rect.data.id}
+                        key={rect.node.id}
                         rect={rect} 
-                        highlight={this.props.highlightedNodes.has(rect.data.id)}
+                        highlight={false}
                     />)
                 })
             }
@@ -99,12 +98,7 @@ const mapStateToProps = (state, ownProps) => {
     zoom: selectors.zoom(state),
     xScale: selectors.xScale(state),
     yScale: selectors.yScale(state),
-    rootNodes: graphSelectors.rootNodes(state),
     arrows: selectors.arrows(state),
-    flatGraph: graphSelectors.flatGraph(state),
-    nodesWithCoordinates: graphSelectors.nodesWithCoordinates(state),
-    highlightedNodes: graphSelectors.highlightedNodes(state),
-    rects: graphSelectors.graph_(state).rects,
   };
 }
 

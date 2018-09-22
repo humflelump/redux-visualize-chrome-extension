@@ -28,4 +28,39 @@ export default class Node {
             this.indexedParents[node.id] = node;
         }
     }
+
+    getDependencies() {
+        const nodes = [];
+        getDependencies(this, new Set(), nodes);
+        return nodes;
+    }
+
+    getDependents() {
+        const nodes = [];
+        getDependents(this, new Set(), nodes);
+        console.log('bleh', nodes);
+        return nodes;
+    }
+}
+
+function getDependents(node, set, nodes) {
+    if (set.has(node.id)) {
+        return;
+    }
+    set.add(node.id);
+    nodes.push(node);
+    for (const parent of node.parents) {
+        getDependents(parent, set, nodes);
+    }
+}
+
+function getDependencies(node, set, nodes) {
+    if (set.has(node.id)) {
+        return;
+    }
+    set.add(node.id);
+    nodes.push(node);
+    for (const child of node.children) {
+        getDependencies(child, set, nodes);
+    }
 }
