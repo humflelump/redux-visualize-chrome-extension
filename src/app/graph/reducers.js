@@ -1,13 +1,12 @@
 import * as constants from './constants';
 
 const initialState = {
-    graph: [],
+    graph: [], //comes from child app
+    dispatchId: 0, //comes from child app
     hoveredNode: null,
-    clickedNodes: new Set(),
     filterOption: constants.DEPENDANCIES,
     animations: false,
     settingsOpen: false,
-    nodeWithMenu: null,
     xTo: [0, 500],
     xFrom: [0, 500],
     yTo: [0, 500],
@@ -16,9 +15,7 @@ const initialState = {
 const Graph = (state = initialState, action) => {
     switch (action.type) {
         case 'SET_GRAPH':
-            return { ...state, graph: action.graph};
-        case 'SET_NODE_WITH_MENU':
-            return { ...state, nodeWithMenu: action.node };
+            return { ...state, graph: action.graph, dispatchId: action.id };
         case 'SET_HOVERED_NODE':
             return { ...state, hoveredNode: action.node };
         case 'SET_CLICKED_NODES':

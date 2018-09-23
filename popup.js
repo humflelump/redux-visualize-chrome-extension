@@ -6,7 +6,6 @@ window.onload = function() {
 }
 
 function buttonClicked() {
-    console.log('clicked')
     chrome.tabs.query({active: true, currentWindow: false}, function(tabs) {
         var activeTab = tabs[0];
         chrome.tabs.sendMessage(activeTab.id, 'GRAPH_REQUESTED')
@@ -19,7 +18,8 @@ function renderGraph(graph) {
   console.log('window.store', window.store);
   window.store.dispatch({
     type: 'SET_GRAPH',
-    graph: graph,
+    graph: graph.graph,
+    id: graph.dispatchId,
   });
 }
 

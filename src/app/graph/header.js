@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import * as selectors from './selectors';
+import * as actions from './actions';
 import * as constants from './constants';
 import * as graphSelectors from './create-graph-selectors';
 import * as d3 from 'd3';
-import * as actions from './actions';
 
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -59,8 +59,8 @@ const Header = (props) => {
         <div style={styles.flex}>
             <FlatButton
                 label="Show Everything" 
-                onClick={props.resetClickedNodes}
-                disabled={props.clickedNodes.size === 0}
+                onClick={props.showEverything}
+                disabled={props.nodeToFilterOn === null}
             />
         </div>
         <div style={styles.flex}>
@@ -75,24 +75,18 @@ const Header = (props) => {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    filterOption: state.Graph.filterOption,
-    clickedNodes: state.Graph.clickedNodes,
     isZoomedOut: selectors.isZoomedOut(state),
+    nodeToFilterOn: state.ContextMenu.nodeToFilterOn,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setFilterOption: (val) => {
+    showEverything: () => {
         dispatch({
-            type: 'SET_FILTER_OPTION',
-            option: val,
+            type: 'REMOVE_NODE_TO_FILTER_ON',
         });
-    },
-    resetClickedNodes: () => {
-        dispatch({
-            type: 'RESET_CLICKED_NODES',
-        });
+        actions.resetZoom();
     },
     openSettings: () => {
         dispatch({

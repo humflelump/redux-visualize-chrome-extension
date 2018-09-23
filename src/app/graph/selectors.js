@@ -3,44 +3,72 @@ import createAsyncSelector from 'async-selector';
 import * as d3 from 'd3';
 import * as functions from './functions';
 import * as constants from './constants';
+import * as settingsConstants from '../settings/constants';
 import * as graphSelectors from './create-graph-selectors';
+import * as contextSelectors from '../context-menu/selectors';
 import _ from 'underscore';
 
+const menuDimensions = contextSelectors.dimensions;
 const width = state => state.Window.width;
 const height = state => state.Window.height;
 const xTo = state => state.Graph.xTo;
 const yTo = state => state.Graph.yTo;
 const xFrom = state => state.Graph.xFrom;
 const yFrom = state => state.Graph.yFrom;
+const hoveredNode = state => state.Graph.hoveredNode;
+const hoverOption = state => state.Settings.hoverOption;
+const maxNodesOnScreen = state => state.Settings.maxNodesOnScreen;
 const rectangles = graphSelectors.rectangles;
 
 
-function getDimensions(width, height) {
+function getDimensions(width, height, menuDimensions) {
     const HEADER = constants.HEADER_SIZE;
+    const bottomHeight = (menuDimensions.bottom + menuDimensions.height);
     return {
         width: width,
-        height: height - HEADER,
+        height: height - HEADER - bottomHeight,
         top: HEADER,
         left: 0,
     };
 }
-export const chartDimensions = createSelector([width, height], getDimensions);
+export const chartDimensions = createSelector([width, height, menuDimensions], getDimensions);
 
 export function getZoomedOutScales(rectangles, chartDimensions) {
-
-    const size = Math.min(chartDimensions.width, chartDimensions.height)
-    const padding = size / 20;
-    const extent = [padding, size - padding];
-    const result = {
-        x: [d3.min(rectangles.map(d => d.x)), d3.max(rectangles.map(d => d.x + d.width))],
-        y: [d3.min(rectangles.map(d => d.y)), d3.max(rectangles.map(d => d.y + d.height))],
+    const windowAspectRatio = chartDimensions.width / chartDimensions.height;
+    const pad = (extent) => {
+        const size = extent[1] - extent[0];
+        const FRACTION = 1 / 12;
+        return [extent[0] - size * FRACTION, extent[1] + size * FRACTION];
     }
-    const size2 = Math.max(result.x[1] - result.x[0], result.y[1] - result.y[0]);
-    result.x[1] = result.x[0] + size2;
-    result.y[1] = result.y[0] + size2;
+    const result = {
+        x: pad([d3.min(rectangles.map(d => d.x)), d3.max(rectangles.map(d => d.x + d.width))]),
+        y: pad([d3.min(rectangles.map(d => d.y)), d3.max(rectangles.map(d => d.y + d.height))]),
+    }
+
+    const rectsAspectRatio = (result.x[1] - result.x[0]) / (result.y[1] - result.y[0]);
+    if (rectsAspectRatio >= windowAspectRatio) {
+        const heightFraction = windowAspectRatio / rectsAspectRatio;
+        const topFraction = (1 - heightFraction) / 2;
+        const xExtent = [0, chartDimensions.width];
+        const yExtent = [
+            chartDimensions.height * topFraction,
+            chartDimensions.height * (topFraction + heightFraction)
+        ]
+        return {
+            x: d3.scaleLinear().domain(result.x).range(xExtent),
+            y: d3.scaleLinear().domain(result.y).range(yExtent),
+        }
+    }
+    const widthFraction = rectsAspectRatio / windowAspectRatio;
+    const leftFraction = (1 - widthFraction) / 2;
+    const yExtent = [0, chartDimensions.height];
+    const xExtent = [
+        chartDimensions.width * leftFraction,
+        chartDimensions.width * (leftFraction + widthFraction)
+    ]
     return {
-        x: d3.scaleLinear().domain(result.x).range(extent),
-        y: d3.scaleLinear().domain(result.y).range(extent),
+        x: d3.scaleLinear().domain(result.x).range(xExtent),
+        y: d3.scaleLinear().domain(result.y).range(yExtent),
     }
 }
 export const extent = createSelector([rectangles, chartDimensions], getZoomedOutScales);
@@ -73,6 +101,26 @@ function getZoom(chartDimensions) {
 }
 export const zoom = createSelector([chartDimensions], getZoom);
 
+function getHighlightedNodes(hoveredNode, hoverOption) {
+    if (!hoveredNode) return new Set();
+    const dependencies = hoveredNode.getDependencies();
+    const dependents = hoveredNode.getDependents();
+    switch(hoverOption) {
+        case settingsConstants.NEITHER:
+            return new Set();
+        case settingsConstants.DEPENDANCIES:
+            return new Set(dependencies.map(d => d.id));
+        case settingsConstants.DEPENDANTS:
+            return new Set(dependents.map(d => d.id));
+        case settingsConstants.BOTH:
+            return new Set([...dependents, ...dependencies].map(d => d.id));
+        default:
+            return new Set();
+    }
+}
+export const highlightedNodes = createSelector([hoveredNode, hoverOption], getHighlightedNodes);
+
+
 function getRectangesInPixelSpace(rectangles, xScale, yScale) {
     const results = rectangles.map((rect) => {
         const x1 = xScale(rect.x);
@@ -90,14 +138,33 @@ function getRectangesInPixelSpace(rectangles, xScale, yScale) {
     });
     return results;
 }
-
 export const pxlRects = createSelector([rectangles, xScale, yScale], getRectangesInPixelSpace);
 
+function getRectanglesOnScreen(pxlRects, chartDimensions) {
+    const minX = 0
+    const maxX = chartDimensions.width;
+    const minY = 0
+    const maxY = chartDimensions.height;
+    return pxlRects.filter((rect) => {
+        if (rect.x + rect.width < minX) return false;
+        if (rect.x > maxX) return false;
+        if (rect.y + rect.height < minY) return false;
+        if (rect.y > maxY) return false;
+        return true;
+    });
+}
+export const onScreenRectangles = createSelector([pxlRects, chartDimensions], getRectanglesOnScreen);
 
-function getArrows(rectangles) {
+function removeRectsForPerformance(rectangles, maxNodesOnScreen) {
+    if (rectangles.length <= maxNodesOnScreen) return rectangles;
+    return rectangles.slice(0, maxNodesOnScreen);
+}
+export const performanceRectangles = createSelector([onScreenRectangles, maxNodesOnScreen], removeRectsForPerformance);
+
+function getArrows(rectangles, onScreenRectangles) {
     const indexed = _.indexBy(rectangles, d => d.node.id);
     const arrows = [];
-    for (const rectangle of rectangles) {
+    for (const rectangle of onScreenRectangles) {
         for (const id of rectangle.node.data.dependencies) {
             const target = indexed[id];
             const start = functions.getArrowStart(rectangle);
@@ -114,5 +181,5 @@ function getArrows(rectangles) {
     }
     return arrows;
 }
-export const arrows = createSelector([pxlRects], getArrows);
+export const arrows = createSelector([pxlRects, performanceRectangles], getArrows);
 

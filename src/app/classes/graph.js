@@ -19,7 +19,6 @@ export default class Graph {
             this.giveNodesAllowedPositions();
             this.solveForX();
         }
-        console.log('graph', this);
     }
 
     solveForX() {
@@ -46,7 +45,6 @@ export default class Graph {
     giveGraphParentsAndChildren() {
         for (const node of this.nodes) {
             for (const id of node.data.dependencies) {
-                console.log('id', 'grr', this);
                 const child = this.indexedNodes[id];
                 node.addChild(child);
                 child.addParent(node);

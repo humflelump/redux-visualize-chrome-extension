@@ -55,11 +55,12 @@ class Graph extends React.Component {
             <SearchDropdown />
             <div id="Graph" style={styles.divContainer}>
             {
-                this.props.pxlRects.map((rect) => {
+                this.props.rectangles.map((rect) => {
                     return (<Node 
                         key={rect.node.id}
                         rect={rect} 
-                        highlight={false}
+                        highlight={this.props.highlightedNodes.has(rect.node.id)}
+                        selected={this.props.selectedNodeId === rect.node.id}
                     />)
                 })
             }
@@ -94,11 +95,13 @@ function update(data, dom) {
 const mapStateToProps = (state, ownProps) => {
   return {
     chartDimensions: selectors.chartDimensions(state),
-    pxlRects: selectors.pxlRects(state),
+    rectangles: selectors.performanceRectangles(state),
     zoom: selectors.zoom(state),
     xScale: selectors.xScale(state),
     yScale: selectors.yScale(state),
     arrows: selectors.arrows(state),
+    highlightedNodes: selectors.highlightedNodes(state),
+    selectedNodeId: state.ContextMenu.selectedNodeId,
   };
 }
 

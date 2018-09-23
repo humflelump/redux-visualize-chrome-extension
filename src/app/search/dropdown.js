@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import * as selectors from './selectors';
+import * as actions from './actions';
 import * as graphConstants from '../graph/constants';
 import * as constants from './constants';
 import * as graphActions from '../graph/actions';
@@ -28,11 +29,12 @@ function getStyles(open, results) {
             position: 'absolute',
             top: 0,
             right: 0,
-            height: !open ? 0 : Math.min(500, constants.LISTITEM_HEIGHT * results.length + 10),
+            height: !open ? 0 : Math.min(300, constants.LISTITEM_HEIGHT * results.length + 10),
             width: constants.DROPDOWN_WIDTH,
             transition: 'all 0.3s',
-            zIndex: 2,
-            backgroundColor: 'rgb(64, 0, 124)'
+            zIndex: 3,
+            backgroundColor: 'rgb(64, 0, 124)',
+            overflow: 'auto',
         },
         containerContainer: {
             position: 'absolute',
@@ -49,15 +51,17 @@ function getStyles(open, results) {
 
 const SearchDropdown = (props) => {
     const styles = getStyles(props.open, props.results);
-    return <div onClick={props.close} style={styles.containerContainer}>
+    return <div style={styles.containerContainer}>
         <Paper zDepth={2} style={styles.container}>
             <List>
             {
                 props.results.map((node) => {
                     return <ListItem 
-                        onClick={() => graphActions.zoomToNode(node.id)}
-                        primaryText={node.name}
-                        key={node.id}
+                        onClick={() => {
+                            actions.searchItemClicked(node);
+                        }}
+                        primaryText={node.data.name}
+                        key={node.data.id}
                     />
                 })
             }

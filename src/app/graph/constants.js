@@ -34,12 +34,6 @@ export function getColorForType(type) {
 
 export const HEADER_SIZE = 50;
 
-export const DEPENDANTS = 'Dependents';
-export const DEPENDANCIES = 'Dependencies';
-export const BOTH = 'Both';
-export const NEITHER = 'Neither';
-export const FILTER_OPTIONS = [DEPENDANCIES, DEPENDANTS, BOTH, /*NEITHER*/];
-
 export const TRANSITION_MS = 200;
 
 export const SETTINGS_WIDTH = 300;

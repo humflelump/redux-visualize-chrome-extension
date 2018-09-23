@@ -38,7 +38,6 @@ export default class Node {
     getDependents() {
         const nodes = [];
         getDependents(this, new Set(), nodes);
-        console.log('bleh', nodes);
         return nodes;
     }
 }
