@@ -28,6 +28,12 @@ const Graph = (state = initialState, action) => {
             return { ...state, animations: !state.animations };
         case 'TOGGLE_SETTINGS_OPEN_STATE':
             return { ...state, settingsOpen: !state.settingsOpen };
+        case 'SET_DOMAINS':
+            return {
+                ...state,
+                xFrom: action.x,
+                yFrom: action.y,
+            };
         case 'SET_SCALES':
             return { 
                 ...state,

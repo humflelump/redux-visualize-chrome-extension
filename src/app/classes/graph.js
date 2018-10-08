@@ -180,6 +180,7 @@ function getSolution(nodes, index, previouslySeen) {
         }
     }
     const default_ = _.last(node.allowedPositions);
+    const newAr = [...previouslySeen, default_];
     return [default_, ...getSolution(nodes, index+1, newAr)];
 }
 

@@ -66,10 +66,6 @@ const Node = (props) => {
     return (<div 
         className="node-container"
         style={styles.container} 
-        onContextMenu={(e) => {
-            e.preventDefault();
-            props.setMenu(rect);
-        }}
         onMouseEnter={() => props.setHovered(rect.node)}
         onMouseLeave={() => props.setHovered(null)}
         onClick={() => props.setClicked(rect.node.id)}
@@ -83,7 +79,7 @@ const Node = (props) => {
                 ? null
                 : <pre>
                 {(rect.node.data.description ? rect.node.data.description + '\n' : '')}
-                {(rect.node.data.stringifiedResult || '')}
+                {(rect.node.data.stringifiedResult || '').slice(0, 150)}
             </pre>
         }
         </div>
@@ -103,6 +99,7 @@ const mapDispatch = (dispatch) => {
                 type: 'SET_SELECTED_NODE',
                 node,
             });
+            actions.centerScalesAroundNode(node)
         },
     }
 }

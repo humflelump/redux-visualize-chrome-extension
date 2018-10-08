@@ -18,6 +18,8 @@ import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
+import JSONTree from 'react-json-tree'
+
 function getStyles(dimensions) {
     const HEADER = 32;
     return {
@@ -89,7 +91,7 @@ const ContextMenu = (props) => {
     const d = (props.selectedNode || {}).data || {};
     return <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
         <Paper zDepth={3} id="context" style={styles.container}>
-            <div style={styles.header}>
+            <Paper style={styles.header}>
                 <div style={styles.closeButton}>
                     <div style={{marginTop: -8}}>
                         <IconButton onClick={props.close}>
@@ -98,11 +100,26 @@ const ContextMenu = (props) => {
                     </div>
                 </div>
                 <div style={styles.headerText}>{d.name}</div>
-            </div>
-            <div style={styles.dataArea}>
-                <pre style={styles.jsonString}>
+            </Paper>
+            <div style={styles.dataArea} onClick={() => window.log(d.id)}>
+                <JSONTree 
+                    data={props.nodeMetadata} 
+                    hideRoot={true} 
+                    theme={constants.jsonTheme}
+                    invertTheme={true}
+                />
+                <Divider />
+                <JSONTree 
+                    data={props.nodeValue} 
+                    hideRoot={true} 
+                    theme={constants.jsonTheme}
+                    invertTheme={true}
+                />
+                
+                
+                {/* <pre style={styles.jsonString}>
                     {props.dataText}
-                </pre>
+                </pre> */}
             </div>
             <div style={styles.listArea}>
                 <div style={styles.filterHeaderText}>
@@ -135,7 +152,8 @@ const mapStateToProps = (state, ownProps) => {
     dimensions: selectors.dimensions(state),
     selectedNode: selectors.selectedNode(state),
     filterType: state.ContextMenu.filterType,
-    dataText: selectors.dataText(state),
+    nodeValue: selectors.nodeValue(state),
+    nodeMetadata: selectors.nodeMetadata(state),
   };
 }
 

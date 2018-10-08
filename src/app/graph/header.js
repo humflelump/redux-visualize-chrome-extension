@@ -3,7 +3,9 @@ import { connect } from 'react-redux'
 import * as selectors from './selectors';
 import * as actions from './actions';
 import * as constants from './constants';
+import * as settingsSelectors from '../settings/selectors';
 import * as graphSelectors from './create-graph-selectors';
+import * as contextSelectors from '../context-menu/selectors';
 import * as d3 from 'd3';
 
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -15,8 +17,14 @@ import Search from '../search/container';
 
 import IconButton from 'material-ui/IconButton';
 import ActionSettings from 'material-ui/svg-icons/action/settings';
+import CloseSettings from 'material-ui/svg-icons/navigation/close';
 
-function getStyles(chartDimensions) {
+import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+
+function getStyles(settingsDimensions) {
     return {
         container: {
             top: 0,
@@ -30,13 +38,14 @@ function getStyles(chartDimensions) {
         },
         settingsContainer: {
             position: 'absolute',
-            right: 0,
+            right: settingsDimensions.leftEdge,
             top: 0,
             bottom: 0,
             width: constants.HEADER_SIZE,
             display: 'flex',
             justifyContent: 'space-around',
             flexDirection: 'column',
+            transition: 'all 0.15s',
         },
         flex: {
             display: 'flex',
@@ -48,35 +57,43 @@ function getStyles(chartDimensions) {
 }
 
 const Header = (props) => {
-    const styles = getStyles();
-    return <Paper zDepth={3} style={styles.container}>
-        <Search />
-        <div style={styles.settingsContainer}>
-            <IconButton onClick={props.openSettings} tooltip="Settings">
-                <ActionSettings color="white"/>
-            </IconButton>
-        </div>
-        <div style={styles.flex}>
-            <FlatButton
-                label="Show Everything" 
-                onClick={props.showEverything}
-                disabled={props.nodeToFilterOn === null}
-            />
-        </div>
-        <div style={styles.flex}>
-            <FlatButton
-                label="Reset Zoom" 
-                onClick={actions.resetZoom}
-                disabled={props.isZoomedOut}
-            />
-        </div>
-    </Paper>
+    const styles = getStyles(props.settingsDimensions);
+    return <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
+        <Paper zDepth={3} style={styles.container}>
+            <Search />
+            <div style={styles.settingsContainer}>
+                <IconButton onClick={props.toggleSettings} tooltip="">
+                    {
+                        props.settingsOpen
+                            ? <CloseSettings color="white" />
+                            : <ActionSettings color="white"/>
+                    }
+                </IconButton>
+            </div>
+            <div style={styles.flex}>
+                <FlatButton
+                    label="Show Everything" 
+                    onClick={props.showEverything}
+                    disabled={props.nodeToFilterOn === null}
+                />
+            </div>
+            <div style={styles.flex}>
+                <FlatButton
+                    label="Reset Zoom" 
+                    onClick={actions.resetZoom}
+                    disabled={props.isZoomedOut}
+                />
+            </div>
+        </Paper>
+    </MuiThemeProvider>
 }
 
 const mapStateToProps = (state, ownProps) => {
   return {
     isZoomedOut: selectors.isZoomedOut(state),
-    nodeToFilterOn: state.ContextMenu.nodeToFilterOn,
+    nodeToFilterOn: contextSelectors.nodeToFilterOn(state),
+    settingsDimensions: settingsSelectors.dimensions(state),
+    settingsOpen: state.Graph.settingsOpen
   };
 }
 
@@ -88,7 +105,7 @@ const mapDispatchToProps = (dispatch) => {
         });
         actions.resetZoom();
     },
-    openSettings: () => {
+    toggleSettings: () => {
         dispatch({
             type: 'TOGGLE_SETTINGS_OPEN_STATE',
         });

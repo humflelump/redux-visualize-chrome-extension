@@ -13,13 +13,31 @@ const selectedNodeId = state => state.ContextMenu.selectedNodeId;
 const settingsOpen = state => state.Graph.settingsOpen;
 const serializableFlatGraph = state => state.Graph.graph;
 const filterType = state => state.ContextMenu.filterType;
-const nodeToFilterOn = state => state.ContextMenu.nodeToFilterOn;
+const nodeIdToFilterOn = state => state.ContextMenu.nodeIdToFilterOn;
+const shouldFilterUnconnectedNodes = state => state.Settings.shouldFilterUnconnectedNodes;
+const shouldRemoveInactiveNodes = state => state.Settings.shouldRemoveInactiveNodes;
 
 function getCorrectedGraph(nodes) {
     if (!nodes) return [];
     return graphFunctions.removeNonLeafStateVariables(nodes);
 }
 export const correctedGraph = createSelector([serializableFlatGraph], getCorrectedGraph);
+
+function removeUnconnectedNodesIfNecessary(nodes, shouldFilterUnconnectedNodes) {
+    if (!shouldFilterUnconnectedNodes) {
+        return nodes;
+    }
+    return graphFunctions.removeUnconnectedNodes(nodes);
+}
+export const correctedGraph2 = createSelector([correctedGraph, shouldFilterUnconnectedNodes], removeUnconnectedNodesIfNecessary);
+
+function removeUnupdatedNodesIfNecessary(nodes, dispatchId, shouldRemoveInactiveNodes) {
+    if (!shouldRemoveInactiveNodes) {
+        return nodes;
+    }
+    return graphFunctions.removeUnupdatedNodes(nodes, dispatchId);
+}
+export const correctedGraph3 = createSelector([correctedGraph2, dispatchId, shouldRemoveInactiveNodes], removeUnupdatedNodesIfNecessary);
 
 function createGraph(flatGraph) {
     const nodes = flatGraph.map(d => {
@@ -28,13 +46,39 @@ function createGraph(flatGraph) {
     const graph = new Graph(nodes);
     return graph.nodes;
 }
-export const nodes = createSelector([correctedGraph], createGraph);
+export const nodes = createSelector([correctedGraph3], createGraph);
+
+function getNodeToFilterOn(nodeIdToFilterOn, nodes) {
+    const node = nodes.find(n => n.id === nodeIdToFilterOn);
+    return node || null;
+}
+export const nodeToFilterOn = createSelector([nodeIdToFilterOn, nodes], getNodeToFilterOn);
 
 function getSelectedNode(selectedNodeId, nodes) {
     const node = nodes.find(n => n.id === selectedNodeId);
     return node || null;
 }
 export const selectedNode = createSelector([selectedNodeId, nodes], getSelectedNode);
+
+function getNodeData(selectedNode) {
+    if (!selectedNode) return { data: 'na' };
+    return selectedNode.data.value;
+}
+export const nodeValue = createSelector([selectedNode], getNodeData);
+
+function getNodeMetatdata(selectedNode, dispatchId) {
+    if (!selectedNode) return { data: 'na' };
+    const d = selectedNode.data;
+    const duration = typeof d.duration === 'number'
+        ? d.duration.toPrecision(4)
+        : 'N/A';
+    return {
+        description: d.description,
+        duration: `${duration} ms`,
+        lastCalled: dispatchId - d.dispatchId,
+    }
+}
+export const nodeMetadata = createSelector([selectedNode, dispatchId], getNodeMetatdata);
 
 function getText(selectedNode, dispatchId) {
     if (!selectedNode) return '';

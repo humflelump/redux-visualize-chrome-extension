@@ -2,7 +2,7 @@ import * as constants from './constants';
 
 const initialState = {
     selectedNodeId: null,
-    nodeToFilterOn: null,
+    nodeIdToFilterOn: null,
     filterType: constants.NO_FILTER,
 };
 const ContextMenu = (state = initialState, action) => {
@@ -10,12 +10,12 @@ const ContextMenu = (state = initialState, action) => {
         case 'REMOVE_NODE_TO_FILTER_ON':
             return {
                 ...state,
-                nodeToFilterOn: null,
+                nodeIdToFilterOn: null,
             };
         case 'SET_NODE_TO_FILTER_ON':
             return {
                 ...state, 
-                nodeToFilterOn: action.node,
+                nodeIdToFilterOn: action.node.id,
                 filterType: action.filter,
             };
         case 'SET_SELECTED_NODE':

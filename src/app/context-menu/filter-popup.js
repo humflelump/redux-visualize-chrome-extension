@@ -59,7 +59,7 @@ const FilterPopup = (props) => {
                 </div>
                 <div 
                     onClick={() => {
-                        props.setFilter(null, props.filterType);
+                        props.removeFilter();
                         graphActions.resetZoom();
                     }} 
                     style={styles.removeLabel}
@@ -74,18 +74,16 @@ const FilterPopup = (props) => {
 const mapStateToProps = (state, ownProps) => {
   return {
     filterPopupDimensions: selectors.filterPopupDimensions(state),
-    nodeToFilterOn: state.ContextMenu.nodeToFilterOn,
+    nodeToFilterOn: selectors.nodeToFilterOn(state),
     filterType: state.ContextMenu.filterType,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setFilter: (node, filter) => {
+    removeFilter: () => {
         dispatch({
-            type: 'SET_NODE_TO_FILTER_ON',
-            filter: filter,
-            node: node,
+            type: 'REMOVE_NODE_TO_FILTER_ON',
         });
     },
     setSelectedNode: (node) => {

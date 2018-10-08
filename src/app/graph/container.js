@@ -8,6 +8,11 @@ import Arrows from './arrow';
 import Header from './header';
 import SearchDropdown from '../search/dropdown';
 
+import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+
 function getStyles(chartDimensions) {
     return {
         container: {
@@ -50,23 +55,25 @@ class Graph extends React.Component {
     render() {
         const styles = getStyles(this.props.chartDimensions);
 
-        return <div style={styles.container} >
-            <Header />
-            <SearchDropdown />
-            <div id="Graph" style={styles.divContainer}>
-            {
-                this.props.rectangles.map((rect) => {
-                    return (<Node 
-                        key={rect.node.id}
-                        rect={rect} 
-                        highlight={this.props.highlightedNodes.has(rect.node.id)}
-                        selected={this.props.selectedNodeId === rect.node.id}
-                    />)
-                })
-            }
+        return <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
+            <div style={styles.container} >
+                <Header />
+                <SearchDropdown />
+                <div id="Graph" style={styles.divContainer}>
+                {
+                    this.props.rectangles.map((rect) => {
+                        return (<Node 
+                            key={rect.node.id}
+                            rect={rect} 
+                            highlight={this.props.highlightedNodes.has(rect.node.id)}
+                            selected={this.props.selectedNodeId === rect.node.id}
+                        />)
+                    })
+                }
+                </div>
+                <Arrows />
             </div>
-            <Arrows />
-        </div>
+        </MuiThemeProvider>
     }
 }
 

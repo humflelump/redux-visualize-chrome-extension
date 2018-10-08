@@ -4,6 +4,7 @@ import Window from '../window/reducers';
 import Search from '../search/reducers';
 import ContextMenu from '../context-menu/reducers';
 import Settings from '../settings/reducers';
+import ActionsList from '../actions-list/reducers';
 
 export default combineReducers({
   Graph,
@@ -11,4 +12,5 @@ export default combineReducers({
   Search,
   ContextMenu,
   Settings,
+  ActionsList,
 });

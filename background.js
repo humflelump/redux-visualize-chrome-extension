@@ -5,7 +5,6 @@ chrome.browserAction.onClicked.addListener(function(tab) {
         url: chrome.runtime.getURL("popup.html"),
         type: "popup",
         width: 700,
-        height: 500,
         top: 90,
         left: 50,
     });

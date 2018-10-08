@@ -5,9 +5,11 @@ import * as functions from './functions';
 import * as constants from './constants';
 import * as settingsConstants from '../settings/constants';
 import * as graphSelectors from './create-graph-selectors';
+import * as settingsSelectors from '../settings/selectors';
 import * as contextSelectors from '../context-menu/selectors';
 import _ from 'underscore';
 
+const settingsDimensions = settingsSelectors.dimensions;
 const menuDimensions = contextSelectors.dimensions;
 const width = state => state.Window.width;
 const height = state => state.Window.height;
@@ -18,60 +20,22 @@ const yFrom = state => state.Graph.yFrom;
 const hoveredNode = state => state.Graph.hoveredNode;
 const hoverOption = state => state.Settings.hoverOption;
 const maxNodesOnScreen = state => state.Settings.maxNodesOnScreen;
-const rectangles = graphSelectors.rectangles;
+export const rectangles = graphSelectors.rectangles;
 
 
-function getDimensions(width, height, menuDimensions) {
+function getDimensions(width, height, menuDimensions, settingsDimensions) {
     const HEADER = constants.HEADER_SIZE;
     const bottomHeight = (menuDimensions.bottom + menuDimensions.height);
     return {
-        width: width,
+        width: width - (settingsDimensions.width + settingsDimensions.right),
         height: height - HEADER - bottomHeight,
         top: HEADER,
         left: 0,
     };
 }
-export const chartDimensions = createSelector([width, height, menuDimensions], getDimensions);
+export const chartDimensions = createSelector([width, height, menuDimensions, settingsDimensions], getDimensions);
 
-export function getZoomedOutScales(rectangles, chartDimensions) {
-    const windowAspectRatio = chartDimensions.width / chartDimensions.height;
-    const pad = (extent) => {
-        const size = extent[1] - extent[0];
-        const FRACTION = 1 / 12;
-        return [extent[0] - size * FRACTION, extent[1] + size * FRACTION];
-    }
-    const result = {
-        x: pad([d3.min(rectangles.map(d => d.x)), d3.max(rectangles.map(d => d.x + d.width))]),
-        y: pad([d3.min(rectangles.map(d => d.y)), d3.max(rectangles.map(d => d.y + d.height))]),
-    }
-
-    const rectsAspectRatio = (result.x[1] - result.x[0]) / (result.y[1] - result.y[0]);
-    if (rectsAspectRatio >= windowAspectRatio) {
-        const heightFraction = windowAspectRatio / rectsAspectRatio;
-        const topFraction = (1 - heightFraction) / 2;
-        const xExtent = [0, chartDimensions.width];
-        const yExtent = [
-            chartDimensions.height * topFraction,
-            chartDimensions.height * (topFraction + heightFraction)
-        ]
-        return {
-            x: d3.scaleLinear().domain(result.x).range(xExtent),
-            y: d3.scaleLinear().domain(result.y).range(yExtent),
-        }
-    }
-    const widthFraction = rectsAspectRatio / windowAspectRatio;
-    const leftFraction = (1 - widthFraction) / 2;
-    const yExtent = [0, chartDimensions.height];
-    const xExtent = [
-        chartDimensions.width * leftFraction,
-        chartDimensions.width * (leftFraction + widthFraction)
-    ]
-    return {
-        x: d3.scaleLinear().domain(result.x).range(xExtent),
-        y: d3.scaleLinear().domain(result.y).range(yExtent),
-    }
-}
-export const extent = createSelector([rectangles, chartDimensions], getZoomedOutScales);
+export const extent = createSelector([rectangles, chartDimensions], functions.getZoomedOutScales);
 
 
 function getXScale(xTo, xFrom) {
